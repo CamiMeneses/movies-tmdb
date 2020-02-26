@@ -11,6 +11,19 @@ class MoviesController < ApplicationController
     render json: { data: ordered_movies }
   end
 
+  def create
+    new_movie = TMDb::Movie.search(param_title).first
+    Movie.find_or_initialize_by(tmdb_id: new_movie.id)
+      .update(
+        title: new_movie.title,
+        overview: new_movie.overview,
+        vote_count: new_movie.vote_count,
+        poster_path: new_movie.poster_path,
+        release_date: new_movie.release_date
+      )
+    render json: { data: Movie.find_or_initialize_by(tmdb_id: new_movie.id)}
+  end
+
   private
 
   def ordered_movies
@@ -42,5 +55,8 @@ class MoviesController < ApplicationController
   def param_order
     params[:order].downcase
   end
-end
 
+  def param_title
+    params[:title].downcase
+  end
+end
